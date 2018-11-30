@@ -1,14 +1,46 @@
 {
   "name": "vue-photoswipe.js",
-  "version": "0.1.0",
-  "private": true,
+  "description": "Vue.js plugin for photoswipe, support directive mode.",
+  "version": "2.0.1",
+  "author": {
+    "name": "Emil Zhai",
+    "email": "root@derzh.com"
+  },
+  "keywords": [
+    "vue",
+    "gallery",
+    "image",
+    "preview",
+    "album",
+    "photoswipe",
+    "photo-swipe"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinymins/vue-photoswipe.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tinymins/vue-photoswipe.js/issues"
+  },
+  "homepage": "https://github.com/tinymins/vue-photoswipe#readme",
+  "files": [
+    "dist/*",
+    "src/*",
+    "public/*",
+    "*.json",
+    "*.js"
+  ],
+  "main": "./dist/photoswipe.common.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-bundle": "vue-cli-service build --target lib --name vue-photoswipe ./src/components/photoswipe/index.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "vue": "^2.5.17"
+    "vue": "^2.5.17",
+    "photoswipe": "^4.1.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.2.0",
