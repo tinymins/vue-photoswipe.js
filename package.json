@@ -1,6 +1,6 @@
 {
   "name": "vue-photoswipe.js",
-  "description": "Vue.js plugin for photoswipe, support directive mode.",
+  "description": "A directive supported plugin for PhotoSwipe in Vue.js components.",
   "version": "2.0.2",
   "author": {
     "name": "Emil Zhai",
