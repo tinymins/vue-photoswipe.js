@@ -25,11 +25,10 @@
   },
   "homepage": "https://github.com/tinymins/vue-photoswipe#readme",
   "files": [
-    "dist/*.js",
-    "dist/*.map",
-    "dist/*.css",
+    "dist/*",
     "src/components/*",
-    "index.js"
+    "*.js",
+    "*.json"
   ],
   "main": "./dist/photoswipe.common.js",
   "scripts": {
