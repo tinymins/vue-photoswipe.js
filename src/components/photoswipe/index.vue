@@ -48,8 +48,6 @@
 
 <script>
 /* eslint no-param-reassign: "off" */
-import 'photoswipe/dist/photoswipe.css';
-import 'photoswipe/dist/default-skin/default-skin.css';
 import PhotoSwipe from 'photoswipe';
 import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
 
@@ -127,3 +125,8 @@ export default {
   },
 };
 </script>
+
+<style>
+@import "~photoswipe/dist/photoswipe.css";
+@import "~photoswipe/dist/default-skin/default-skin.css";
+</style>
