@@ -1,7 +1,7 @@
 {
   "name": "vue-photoswipe.js",
   "description": "Vue.js plugin for photoswipe, support directive mode.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": {
     "name": "Emil Zhai",
     "email": "root@derzh.com"
@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/tinymins/vue-photoswipe#readme",
   "files": [
-    "dist/*",
-    "src/*",
-    "public/*",
-    "*.json",
-    "*.js"
+    "dist/*.js",
+    "dist/*.map",
+    "dist/*.css",
+    "src/components/*",
+    "index.js"
   ],
   "main": "./dist/photoswipe.common.js",
   "scripts": {
