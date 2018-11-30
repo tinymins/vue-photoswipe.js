@@ -92,3 +92,24 @@ If the `src` of img (or `background-image` of div) is a thumbnail, you may want 
 ```html
 <img v-photoswipe="{ origin: 'some/img/origin.png' }" src="some/img/thumb.png">
 ```
+
+Also, you can manually call function to open or close a dynamic `PhotoSwipe` instance.
+
+```js
+// ...
+mounted() {
+  this.$photoswipe.open(items, options);
+},
+destroy() {
+  this.$photoswipe.close();
+},
+// ...
+```
+
+```js
+import Vue from 'vue';
+
+vue.photoswipe.open(items, options);
+```
+
+For more infomation about `items` and `options`, see [PhotoSwipe official document](http://photoswipe.com/documentation/options.html).
