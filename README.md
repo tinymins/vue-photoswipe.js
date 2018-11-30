@@ -6,10 +6,11 @@ A directive supported plugin for PhotoSwipe in Vue.js components.
 
 > npm i vue-photoswipe.js -s
 
-Add code likes below before create `Vue` instance:
+Import photoswipe component and css before create `Vue` instance:
 
 ```js
 import PhotoSwipe from 'vue-photoswipe.js';
+import 'vue-photoswipe.js/dist/vue-photoswipe.css';
 
 Vue.use(PhotoSwipe);
 
