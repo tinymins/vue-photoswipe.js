@@ -6,6 +6,11 @@
  * @copyright: Copyright (c) 2018 TINYMINS.
  */
 
-import photoswipe from '@/components/photoswipe';
+import Vue from 'vue';
+import App from './App';
 
-export default photoswipe;
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  render: h => h(App),
+});

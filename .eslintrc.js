@@ -1,3 +1,4 @@
+// http://eslint.org/docs/user-guide/configuring
 module.exports = {
   root: true,
   parserOptions: {
@@ -6,23 +7,31 @@ module.exports = {
     ecmaVersion: 2018,
   },
   env: {
-    node: true,
     browser: true,
   },
   extends: [
     'eslint:recommended',
-    'plugin:vue/recommended', // 'plugin:vue/essential',
-    '@vue/airbnb',
+    'plugin:vue/recommended', // or 'plugin:vue/base'
+    'plugin:compat/recommended',
+    'airbnb-base',
   ],
+  // required to lint *.vue files
   plugins: [
     'vue',
     'compat',
   ],
+  // check if imports actually resolve
   'settings': {
+    'import/resolver': {
+      'webpack': {
+        'config': 'build/webpack.base.conf.js'
+      }
+    },
     'polyfills': [
       'promises',
     ],
   },
+  // add your custom rules here
   'rules': {
     // eslint rules
     'camelcase': ['error', {
@@ -183,5 +192,5 @@ module.exports = {
     'vue/valid-v-show': 'error',
     'vue/valid-v-text': 'error',
     'compat/compat': 'error',
-  },
-};
+  }
+}
