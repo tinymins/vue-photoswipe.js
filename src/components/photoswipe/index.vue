@@ -19,10 +19,10 @@
         <div class="pswp__top-bar">
           <!--  Controls are self-explanatory. Order can be changed. -->
           <div class="pswp__counter"></div>
-          <button v-show="showClose" class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-          <button v-show="showShare" class="pswp__button pswp__button--share" title="Share"></button>
-          <button v-show="showFullscreen" class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-          <button v-show="showZoom" class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+          <button v-show="options.showClose" class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+          <button v-show="options.showShare" class="pswp__button pswp__button--share" title="Share"></button>
+          <button v-show="options.showFullscreen" class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+          <button v-show="options.showZoom" class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
           <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
           <!-- element will get class pswp__preloader--active when preloader is running -->
           <div class="pswp__preloader">
@@ -36,8 +36,8 @@
         <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
           <div class="pswp__share-tooltip"></div>
         </div>
-        <button v-show="showArrow" class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-        <button v-show="showArrow" class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
+        <button v-show="options.showArrow" class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+        <button v-show="options.showArrow" class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
         <div class="pswp__caption">
           <div class="pswp__caption__center"></div>
         </div>
@@ -47,32 +47,29 @@
 </template>
 
 <script>
-/* eslint no-param-reassign: "off" */
-import PhotoSwipe from 'photoswipe';
-import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
+const pswpOptionsDefault = {
+  showClose: true,
+  showShare: true,
+  showZoom: true,
+  showArrow: true,
+  showFullscreen: true,
+};
 
 export default {
   props: {
-    showClose: {
-      type: Boolean,
-      default: true,
+    PhotoSwipe: {
+      type: Function,
+      required: true,
     },
-    showShare: {
-      type: Boolean,
-      default: true,
+    initOptions: {
+      type: Object,
+      required: true,
     },
-    showFullscreen: {
-      type: Boolean,
-      default: true,
-    },
-    showZoom: {
-      type: Boolean,
-      default: true,
-    },
-    showArrow: {
-      type: Boolean,
-      default: true,
-    },
+  },
+  data() {
+    return {
+      options: Object.assign({}, pswpOptionsDefault, this.initOptions),
+    };
   },
   mounted() {
     window.addEventListener('popstate', this.close);
@@ -88,39 +85,14 @@ export default {
         return;
       }
       Object.entries(options).forEach(([k, v]) => {
-        this[k] = v;
+        this.options[k] = v;
       });
     },
-    async open(items, options) {
-      return new Promise((resolve) => {
-        this.photoswipe = new PhotoSwipe(this.$el, PhotoSwipeUI, items, options);
-        // Auto fix wrong image size after loaded
-        this.photoswipe.listen('gettingData', (_, item) => {
-          const img = new Image();
-          // get real size after image loaded
-          img.onload = () => {
-            const w = img.naturalWidth || img.width;
-            const h = img.naturalHeight || img.height;
-            if (item.w !== w || item.h !== h) {
-              // fix wrong size
-              item.w = w;
-              item.h = h;
-              // reinit items
-              this.photoswipe.invalidateCurrItems();
-              this.photoswipe.updateSize(true);
-            }
-          };
-          img.src = item.src; // start loading image
-        });
-        this.photoswipe.listen('close', resolve);
-        this.photoswipe.init();
-      });
+    open(items, options) {
+      return this.$photoswipe.create(items, options);
     },
     close() {
-      if (!this.photoswipe) {
-        return;
-      }
-      this.photoswipe.close();
+      return this.$photoswipe.destroy();
     },
   },
 };

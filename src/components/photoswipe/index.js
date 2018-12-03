@@ -7,6 +7,8 @@
  */
 /* eslint no-param-reassign: "off" */
 
+import PhotoSwipe from 'photoswipe';
+import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
 import PswpVueDefault from './index.vue';
 
 const getEl = (node) => {
@@ -17,9 +19,9 @@ const getEl = (node) => {
   return node instanceof window.Node ? node : document.querySelector(node);
 };
 
-const getImageThumb = (option, el) => {
-  if (option.src) {
-    return option.src;
+const getImageThumb = (item, el) => {
+  if (item.src) {
+    return item.src;
   }
   if (el instanceof HTMLImageElement) {
     return el.src;
@@ -30,90 +32,129 @@ const getImageThumb = (option, el) => {
       return style.backgroundImage.replace(/^url\(['"]/, '').replace(/['"]\)$/, '');
     }
   }
-  if (option.origin) {
-    return option.origin;
+  if (item.origin) {
+    return item.origin;
   }
   return '';
 };
 
-const getImageOrigin = (option, el) => {
-  if (option.origin) {
-    return option.origin;
+const getImageOrigin = (item, el) => {
+  if (item.origin) {
+    return item.origin;
   }
-  return getImageThumb(option, el);
+  return getImageThumb(item, el);
 };
 
 const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions } = {}) => {
   let directiveIndex = 0;
-  const optionMap = new Map();
-  const vm = new (Vue.extend(PswpVue))().$mount(getEl(mountEl));
+  const itemMap = new Map();
+  const Pswp = Vue.extend(PswpVue);
+  const vm = new Pswp({
+    propsData: {
+      PhotoSwipe,
+      initOptions: pswpOptions,
+    },
+  }).$mount(getEl(mountEl));
   const photoswipe = {
     open: vm.open,
     close: vm.close,
     config: vm.config,
+    create: (items, options) => new Promise((resolve) => {
+      vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI, items, options);
+      // Auto fix wrong image size after loaded
+      vm.photoswipe.listen('gettingData', (_, item) => {
+        const img = new Image();
+        // get real size after image loaded
+        img.onload = () => {
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          if (item.w !== w || item.h !== h) {
+            // fix wrong size
+            item.w = w;
+            item.h = h;
+            // reinit items
+            vm.photoswipe.invalidateCurrItems();
+            vm.photoswipe.updateSize(true);
+          }
+        };
+        img.src = item.src; // start loading image
+      });
+      vm.photoswipe.listen('close', resolve);
+      vm.photoswipe.init();
+    }),
+    destroy: () => {
+      if (!vm.photoswipe) {
+        return;
+      }
+      vm.photoswipe.close();
+      vm.photoswipe.destroy();
+    },
   };
-  photoswipe.config(pswpOptions);
   Vue.photoswipe = photoswipe;
   Vue.prototype.$photoswipe = photoswipe;
 
   const onClick = ({ target }) => {
-    const option = optionMap.get(target);
-    if (!option) {
+    const item = itemMap.get(target);
+    if (!item) {
       return;
     }
-    // get display options
-    const options = option.group
-      ? [...optionMap.entries()].filter(({ 1: p }) => p.group === option.group)
-      : [[target, option]];
+    // get display items
+    const items = item.group
+      ? [...itemMap.entries()].filter(({ 1: p }) => p.group === item.group)
+      : [[target, item]];
     // use wechat preview if possible
     if (wechat) {
       const ua = navigator.userAgent.toLowerCase();
       if (/micromessenger/.test(ua) && !/windowswechat/.test(ua)) {
         wechat.previewImage({
-          urls: options.map(([k, p]) => getImageOrigin(p, k)),
-          current: getImageOrigin(option, target),
+          urls: items.map(([k, p]) => getImageOrigin(p, k)),
+          current: getImageOrigin(item, target),
         });
         return;
       }
     }
     // prepare data and open PhotoSwipe
-    const items = options.map(([el, p]) => ({
+    const images = items.map(([el, p]) => ({
       msrc: getImageThumb(p, el),
       src: getImageOrigin(p, el),
       w: p.w || el.naturalWidth || 0,
       h: p.h || el.naturalHeight || 0,
     }));
-    photoswipe.open(items, { history: false, index: options.findIndex(({ 1: p }) => p === option) || 0 });
+    const options = {
+      history: false,
+      index: items.findIndex(({ 1: p }) => p === item) || 0,
+    };
+    photoswipe.open(images, options);
   };
 
   const update = (el, { arg, value }) => {
-    let option = optionMap.get(el);
+    let item = itemMap.get(el);
     // first time update, init el
-    if (!option) {
+    if (!item) {
       directiveIndex += 1;
-      option = { directiveIndex };
-      optionMap.set(el, option);
+      item = { directiveIndex };
+      itemMap.set(el, item);
       el.addEventListener('click', onClick);
     }
     // update props
     if (typeof value === 'string') {
-      option.group = value;
+      item.group = value;
     } else if (typeof value === 'object' && value !== null) {
-      option.group = value.group;
-      option.index = value.index;
-      option.origin = value.origin;
-      option.gallery = value.gallery;
+      item.group = value.group;
+      item.index = value.index;
+      item.origin = value.origin;
+      item.gallery = value.gallery;
     }
     if (arg && typeof arg === 'string') {
-      option.group = arg;
+      item.group = arg;
     }
   };
 
   const remove = (el) => {
-    if (!optionMap.has(el)) {
+    if (!itemMap.has(el)) {
       return;
     }
-    optionMap.delete(el);
+    itemMap.delete(el);
     el.removeEventListener('click', onClick);
   };
 
