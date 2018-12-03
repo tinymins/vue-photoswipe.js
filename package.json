@@ -31,7 +31,7 @@
     "*.js",
     "*.json"
   ],
-  "main": "src/main.js",
+  "main": "index.js",
   "scripts": {
     "start": "npm run setup && npm run dev",
     "setup": "bash setup.sh",
