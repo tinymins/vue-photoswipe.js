@@ -45,6 +45,19 @@ const getImageOrigin = (item, el) => {
   return getImageThumb(item, el);
 };
 
+const getThumbBounds = (item, el) => {
+  if (item.getThumbBoundsFn) {
+    return item.getThumbBoundsFn(item, el);
+  }
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  const rect = el.getBoundingClientRect();
+  return {
+    x: rect.left,
+    y: rect.top + scrollTop,
+    w: rect.width,
+  };
+};
+
 const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions } = {}) => {
   let directiveIndex = 0;
   const itemMap = new Map();
@@ -123,6 +136,10 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
     const options = {
       history: false,
       index: items.findIndex(({ 1: p }) => p === item) || 0,
+      getThumbBoundsFn: (index) => {
+        const [el, p] = items[index];
+        return getThumbBounds(p, el);
+      },
     };
     photoswipe.open(images, options);
   };
