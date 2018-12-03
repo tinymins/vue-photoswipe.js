@@ -65,6 +65,14 @@ export default {
       type: Object,
       required: true,
     },
+    openPswp: {
+      type: Function,
+      required: true,
+    },
+    closePswp: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
@@ -89,10 +97,10 @@ export default {
       });
     },
     open(items, options) {
-      return this.$photoswipe.create(items, options);
+      return this.openPswp(items, options);
     },
     close() {
-      return this.$photoswipe.destroy();
+      return this.closePswp();
     },
   },
 };

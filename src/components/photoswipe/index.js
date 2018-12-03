@@ -66,42 +66,42 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
     propsData: {
       PhotoSwipe,
       initOptions: pswpOptions,
+      openPswp: (items, options) => new Promise((resolve) => {
+        vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI, items, options);
+        // Auto fix wrong image size after loaded
+        vm.photoswipe.listen('gettingData', (_, item) => {
+          const img = new Image();
+          // get real size after image loaded
+          img.onload = () => {
+            const w = img.naturalWidth || img.width;
+            const h = img.naturalHeight || img.height;
+            if (item.w !== w || item.h !== h) {
+              // fix wrong size
+              item.w = w;
+              item.h = h;
+              // reinit items
+              vm.photoswipe.invalidateCurrItems();
+              vm.photoswipe.updateSize(true);
+            }
+          };
+          img.src = item.src; // start loading image
+        });
+        vm.photoswipe.listen('close', resolve);
+        vm.photoswipe.init();
+      }),
+      closePswp: () => {
+        if (!vm.photoswipe) {
+          return;
+        }
+        vm.photoswipe.close();
+        vm.photoswipe.destroy();
+      },
     },
   }).$mount(getEl(mountEl));
   const photoswipe = {
     open: vm.open,
     close: vm.close,
     config: vm.config,
-    create: (items, options) => new Promise((resolve) => {
-      vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI, items, options);
-      // Auto fix wrong image size after loaded
-      vm.photoswipe.listen('gettingData', (_, item) => {
-        const img = new Image();
-        // get real size after image loaded
-        img.onload = () => {
-          const w = img.naturalWidth || img.width;
-          const h = img.naturalHeight || img.height;
-          if (item.w !== w || item.h !== h) {
-            // fix wrong size
-            item.w = w;
-            item.h = h;
-            // reinit items
-            vm.photoswipe.invalidateCurrItems();
-            vm.photoswipe.updateSize(true);
-          }
-        };
-        img.src = item.src; // start loading image
-      });
-      vm.photoswipe.listen('close', resolve);
-      vm.photoswipe.init();
-    }),
-    destroy: () => {
-      if (!vm.photoswipe) {
-        return;
-      }
-      vm.photoswipe.close();
-      vm.photoswipe.destroy();
-    },
   };
   Vue.photoswipe = photoswipe;
   Vue.prototype.$photoswipe = photoswipe;
