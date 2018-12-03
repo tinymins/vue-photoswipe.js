@@ -60,7 +60,7 @@ module.exports = merge(baseConfig, {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new StyleLintPlugin({
-      configFile: resolve('.stylelintrc'),
+      configFile: resolve('.stylelintrc.js'),
       files: '**/*.{less,scss,sass,vue}',
     }),
   ],
