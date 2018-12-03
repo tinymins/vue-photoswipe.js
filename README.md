@@ -238,4 +238,4 @@ import PswpVue from 'path/to/custom/pswp.vue';
 Vue.use(PhotoSwipe, { PswpVue });
 ```
 
-Notice: If you choose to use your own `pswp` component, css import from this package may not be nessary anymore.
+Notice: If you choose to use your own `pswp` component, css import from this package may not be necessary anymore.
