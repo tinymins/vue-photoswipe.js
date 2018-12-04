@@ -86,7 +86,10 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
           };
           img.src = item.src; // start loading image
         });
-        vm.photoswipe.listen('close', resolve);
+        vm.photoswipe.listen('close', () => {
+          resolve();
+          vm.photoswipe = null;
+        });
         vm.photoswipe.init();
       }),
       closePswp: () => {
