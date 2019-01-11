@@ -97,7 +97,9 @@ export default {
       });
     },
     open(items, options) {
-      return this.openPswp(items, options);
+      return this.openPswp(items
+        .filter(item => item && item.src)
+        .map(item => Object.assign({ w: 0, h: 0 }, item)), options);
     },
     close() {
       return this.closePswp();

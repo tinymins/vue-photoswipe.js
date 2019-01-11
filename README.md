@@ -92,6 +92,10 @@ Also, you can manually call function to open or close a dynamic `PhotoSwipe` ins
 ```js
 // ...
 mounted() {
+  const items = [
+    { src: 'https://website.com/image-1.png' },
+    { src: 'https://website.com/image-2.png', w: 100, h: 100 },
+  ];
   this.$photoswipe.open(items, options);
 },
 destroy() {
