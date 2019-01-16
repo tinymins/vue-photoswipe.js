@@ -126,6 +126,7 @@ module.exports = {
         'allowFirstLine': false
       },
     }],
+    'vue/multiline-html-element-content-newline': 'off',
     'vue/mustache-interpolation-spacing': ['error', 'always'],
     'vue/name-property-casing': ['error', 'kebab-case'],
     'vue/no-async-in-computed-properties': 'error',
@@ -174,6 +175,7 @@ module.exports = {
     'vue/require-v-for-key': 'error',
     'vue/require-valid-default-prop': 'error',
     'vue/return-in-computed-property': 'error',
+    'vue/singleline-html-element-content-newline': 'off',
     'vue/this-in-template': ['error', 'never'],
     'vue/v-bind-style': ['error', 'shorthand'],
     'vue/v-on-style': ['error', 'shorthand'],

@@ -1,67 +1,75 @@
+/**
+ * This file is part of vue-boilerplate.
+ * @link     : https://zhaiyiming.com/
+ * @author   : Emil Zhai (root@derzh.com)
+ * @modifier : Emil Zhai (root@derzh.com)
+ * @copyright: Copyright (c) 2018 TINYMINS.
+ */
+process.env.NODE_ACTION = 'run';
 const merge = require('webpack-merge');
 const webpack = require('webpack');
+const eslintFriendlyFormatter = require('eslint-friendly-formatter');
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const StyleLintPlugin = require('stylelint-webpack-plugin');
-const EslintFriendlyFormatter = require('eslint-friendly-formatter');
-const { resolve } = require('./utils');
-const baseConfig = require('./webpack.base.conf');
 
-module.exports = merge(baseConfig, {
+const utils = require('./utils');
+const loader = require('./utils/loader');
+const webpackBaseConfig = require('./webpack.base.conf');
+const config = require('../config');
+
+const webpackConfig = merge(webpackBaseConfig, {
   mode: 'development',
+  entry: {
+    app: './src/index.js',
+  },
+  output: {
+    path: config.assetsRoot,
+    publicPath: config.assetsPublicPath,
+    filename: utils.assetsPath('js/[name].[hash].js'),
+    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js'),
+  },
   module: {
     rules: [
       {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
         enforce: 'pre',
-        include: [resolve('src'), resolve('test')],
+        include: [utils.fullPath('src'), utils.fullPath('test')],
         options: {
-          // emitWarning: true,
-          cache: true,
-          formatter: EslintFriendlyFormatter,
+          configFile: '.eslintrc.js',
+          // fix: true,
+          // cache: true,
+          emitWarning: true,
+          failOnError: false,
+          formatter: eslintFriendlyFormatter,
         },
       },
-      {
-        test: /\.css$/,
-        use: ['vue-style-loader', 'css-loader', 'postcss-loader'],
-      },
-      {
-        test: /\.less$/,
-        use: ['vue-style-loader', 'css-loader', 'postcss-loader', 'less-loader'],
-      },
-      {
-        test: /\.s(a|c)ss$/,
-        use: ['vue-style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
-      },
+      ...loader.styleLoaders(true),
     ],
   },
-  devtool: '#cheap-eval-source-map',
-  devServer: {
-    port: 9001,
-    hot: true,
-    overlay: {
-      warnings: false,
-      errors: true,
-    },
-    stats: {
-      entrypoints: false,
-      children: false,
-      modules: false,
-      warnings: false,
-      assets: false,
-      version: false,
-      builtAt: false,
-    },
-  },
+  // cheap-module-eval-source-map is faster for localhost dev
+  devtool: '#source-map',
   plugins: [
-    new HtmlWebpackPlugin({
-      template: resolve('./src/index.html'),
-      favicon: resolve('./src/assets/favicon.png'),
+    new MiniCssExtractPlugin({
+      filename: 'static/css/[name].[chunkhash].css',
     }),
+    // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
     new webpack.HotModuleReplacementPlugin(),
-    new StyleLintPlugin({
-      configFile: resolve('.stylelintrc.js'),
-      files: '**/*.{less,scss,sass,vue}',
+    new FriendlyErrorsPlugin(),
+    new HtmlWebpackPlugin({
+      template: utils.fullPath('./src/index.html'),
+      favicon: utils.fullPath('./src/assets/favicon.png'),
     }),
   ],
 });
+
+// add hot-reload related code to entry chunks
+Object.keys(webpackConfig.entry).forEach((name) => {
+  webpackConfig.entry[name] = [
+    'eventsource-polyfill',
+    './build/utils/webpack-hot-middleware-client',
+  ].concat(webpackConfig.entry[name]);
+});
+
+module.exports = webpackConfig;
