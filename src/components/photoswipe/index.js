@@ -29,7 +29,7 @@ const getImageThumb = (item, el) => {
   if (el instanceof HTMLDivElement) {
     const style = getComputedStyle(el);
     if (style && style.backgroundImage) {
-      return style.backgroundImage.replace(/^url\(['"]/, '').replace(/['"]\)$/, '');
+      return style.backgroundImage.replace(/^\s*url\((["'])?(.+?)\1\)$/, '$2');
     }
   }
   if (item.origin) {
