@@ -24,7 +24,9 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/,
+        exclude: file => [
+          resolve('node_modules'),
+        ].some(r => file.indexOf(r) === 0),
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
