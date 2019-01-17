@@ -36,10 +36,10 @@
     "start": "npm run setup && npm run dev",
     "setup": "bash setup.sh",
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "build": "rimraf dist && webpack --config build/webpack.prod.conf.js --progress",
     "lint": "eslint src/**/*.{js,vue} --fix && npm run lint:style",
     "lint:style": "stylelint src/**/*.{less,vue} --fix",
     "prettier": "prettier --write ./src/**/**/**/*",
-    "build": "webpack --config build/webpack.prod.conf.js --progress",
     "commitmsg": "commitlint -E GIT_PARAMS"
   },
   "lint-staged": {
@@ -90,6 +90,7 @@
     "postcss-loader": "^2.1.6",
     "postcss-url": "^7.2.1",
     "prettier": "^1.13.7",
+    "rimraf": "^2.6.3",
     "sass": "^1.15.1",
     "sass-loader": "^7.1.0",
     "script-loader": "^0.7.2",
