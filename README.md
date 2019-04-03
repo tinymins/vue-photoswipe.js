@@ -194,10 +194,6 @@ const pswpOptionsDefault = {
 
 export default {
   props: {
-    PhotoSwipe: {
-      type: Function,
-      required: true,
-    },
     initOptions: {
       type: Object,
       required: true,
