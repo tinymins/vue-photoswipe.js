@@ -8,6 +8,9 @@
 
 import Vue from 'vue';
 import App from './App';
+import PhotoSwipePlugin from './components/photoswipe';
+
+Vue.use(PhotoSwipePlugin);
 
 /* eslint-disable no-new */
 new Vue({
