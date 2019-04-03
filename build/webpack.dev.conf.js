@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
 const EslintFriendlyFormatter = require('eslint-friendly-formatter');
+const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
 const { resolve } = require('./utils');
 const baseConfig = require('./webpack.base.conf');
 
@@ -16,7 +17,7 @@ module.exports = merge(baseConfig, {
         enforce: 'pre',
         include: [resolve('src'), resolve('test')],
         options: {
-          // emitWarning: true,
+          emitWarning: true,
           cache: true,
           formatter: EslintFriendlyFormatter,
         },
@@ -63,5 +64,6 @@ module.exports = merge(baseConfig, {
       configFile: resolve('.stylelintrc.js'),
       files: '**/*.{less,scss,sass,vue}',
     }),
+    new FriendlyErrorsPlugin(),
   ],
 });
