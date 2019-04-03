@@ -101,10 +101,30 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
       },
     },
   }).$mount(getEl(mountEl));
+  const listeners = [];
   const photoswipe = {
     open: vm.open,
     close: vm.close,
     config: vm.config,
+    listen: (eventName, callback) => {
+      if (!listeners[eventName]) {
+        listeners[eventName] = [];
+        vm.photoswipe.listen(eventName, (...args) => {
+          listeners[eventName].forEach(cb => cb(...args));
+        });
+      }
+      listeners[eventName].push(callback);
+    },
+    unlisten: (eventName, callback) => {
+      if (!listeners[eventName]) {
+        return;
+      }
+      const index = listeners[eventName].indexOf(callback);
+      if (index >= 0) {
+        listeners[eventName].splice(index, 1);
+      }
+    },
+    shout: vm.photoswipe.shout,
   };
   Vue.photoswipe = photoswipe;
   Vue.prototype.$photoswipe = photoswipe;
