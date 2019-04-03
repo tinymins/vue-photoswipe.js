@@ -9,7 +9,9 @@
 
 import PhotoSwipe from 'photoswipe';
 import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
-import PswpVueDefault from './index.vue';
+import PswpVueDefault from './pswp';
+
+export { PhotoSwipe };
 
 const getEl = (node) => {
   if (!node || node === 'body') {
@@ -29,7 +31,7 @@ const getImageThumb = (item, el) => {
   if (el instanceof HTMLDivElement) {
     const style = getComputedStyle(el);
     if (style && style.backgroundImage) {
-      return style.backgroundImage.replace(/^\s*url\((["'])?(.+?)\1\)$/, '$2');
+      return style.backgroundImage.replace(/^\s*url\((["'])?(.+?)\1\)$/u, '$2');
     }
   }
   if (item.origin) {
@@ -58,13 +60,13 @@ const getThumbBounds = (item, el) => {
   };
 };
 
-const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions } = {}) => {
+const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions = {} } = {}) => {
   let directiveIndex = 0;
   const itemMap = new Map();
+  const listeners = [];
   const Pswp = Vue.extend(PswpVue);
   const vm = new Pswp({
     propsData: {
-      PhotoSwipe,
       initOptions: pswpOptions,
       openPswp: (items, options) => new Promise((resolve) => {
         vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI, items, options);
@@ -90,6 +92,12 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
           resolve();
           vm.photoswipe = null;
         });
+        // register all listeners
+        Object.keys(listeners).forEach((eventName) => {
+          vm.photoswipe.listen(eventName, (...args) => {
+            listeners[eventName].forEach(cb => cb(...args));
+          });
+        });
         vm.photoswipe.init();
       }),
       closePswp: () => {
@@ -101,7 +109,6 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
       },
     },
   }).$mount(getEl(mountEl));
-  const listeners = [];
   const photoswipe = {
     open: vm.open,
     close: vm.close,
@@ -109,9 +116,11 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
     listen: (eventName, callback) => {
       if (!listeners[eventName]) {
         listeners[eventName] = [];
-        vm.photoswipe.listen(eventName, (...args) => {
-          listeners[eventName].forEach(cb => cb(...args));
-        });
+        if (vm.photoswipe) {
+          vm.photoswipe.listen(eventName, (...args) => {
+            listeners[eventName].forEach(cb => cb(...args));
+          });
+        }
       }
       listeners[eventName].push(callback);
     },
@@ -124,7 +133,7 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
         listeners[eventName].splice(index, 1);
       }
     },
-    shout: vm.photoswipe.shout,
+    shout: (...args) => vm.photoswipe && vm.photoswipe.shout(...args),
   };
   Vue.photoswipe = photoswipe;
   Vue.prototype.$photoswipe = photoswipe;
@@ -141,7 +150,7 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions }
     // use wechat preview if possible
     if (wechat) {
       const ua = navigator.userAgent.toLowerCase();
-      if (/micromessenger/.test(ua) && !/windowswechat/.test(ua)) {
+      if ((/micromessenger/u).test(ua) && !(/windowswechat/u).test(ua)) {
         wechat.previewImage({
           urls: items.map(([k, p]) => getImageOrigin(p, k)),
           current: getImageOrigin(item, target),
