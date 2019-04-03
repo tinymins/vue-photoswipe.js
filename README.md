@@ -87,6 +87,22 @@ If the `src` of img (or `background-image` of div) is a thumbnail, you may want 
 <img v-photoswipe="{ origin: 'some/img/origin.png' }" src="some/img/thumb.png">
 ```
 
+You can listen events by register listeners, remember to call unlisten before component destroy:
+
+```js
+  mounted() {
+    this.$photoswipe.listen('beforeChange', this.beforeChange);
+  },
+  beforeDestroy() {
+    this.$photoswipe.unlisten('beforeChange', this.beforeChange);
+  },
+  methods: {
+    beforeChange(...args) {
+      console.log('beforeChange', ...args); // eslint-disable-line
+    },
+  },
+```
+
 Also, you can manually call function to open or close a dynamic `PhotoSwipe` instance.
 
 ```js
