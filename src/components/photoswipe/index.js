@@ -75,6 +75,9 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
           const img = new Image();
           // get real size after image loaded
           img.onload = () => {
+            if (!vm.photoswipe) {
+              return;
+            }
             const w = img.naturalWidth || img.width;
             const h = img.naturalHeight || img.height;
             if (item.w !== w || item.h !== h) {
