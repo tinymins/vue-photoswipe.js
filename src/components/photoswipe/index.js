@@ -167,6 +167,7 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
       src: getImageOrigin(p, el),
       w: p.w || el.naturalWidth || 0,
       h: p.h || el.naturalHeight || 0,
+      title: p.title,
     }));
     const options = {
       history: false,
@@ -195,6 +196,7 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
       item.group = value.group;
       item.index = value.index;
       item.origin = value.origin;
+      item.title = value.title;
       item.gallery = value.gallery;
     }
     if (arg && typeof arg === 'string') {
