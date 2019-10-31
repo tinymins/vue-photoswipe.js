@@ -63,12 +63,12 @@ const getThumbBounds = (item, el) => {
 const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions = {} } = {}) => {
   let directiveIndex = 0;
   const itemMap = new Map();
-  const listeners = [];
+  const listeners = {};
   const Pswp = Vue.extend(PswpVue);
-  const vm = new Pswp({
-    propsData: {
-      initOptions: pswpOptions,
-      openPswp: (items, options) => new Promise((resolve) => {
+  let vm = null;
+  const photoswipe = {
+    open: (items, options) => new Promise((resolve, reject) => {
+      if (vm) {
         vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI, items, options);
         // Auto fix wrong image size after loaded
         vm.photoswipe.listen('gettingData', (_, item) => {
@@ -102,24 +102,27 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
           });
         });
         vm.photoswipe.init();
-      }),
-      closePswp: () => {
-        if (!vm.photoswipe) {
-          return;
-        }
+      } else {
+        reject();
+      }
+    }),
+    close: () => {
+      if (vm && vm.photoswipe) {
         vm.photoswipe.close();
         vm.photoswipe.destroy();
-      },
+      }
     },
-  }).$mount(getEl(mountEl));
-  const photoswipe = {
-    open: vm.open,
-    close: vm.close,
-    config: vm.config,
+    config: (options) => {
+      if (options) {
+        Object.entries(options).forEach(([k, v]) => {
+          pswpOptions[k] = v;
+        });
+      }
+    },
     listen: (eventName, callback) => {
       if (!listeners[eventName]) {
         listeners[eventName] = [];
-        if (vm.photoswipe) {
+        if (vm && vm.photoswipe) {
           vm.photoswipe.listen(eventName, (...args) => {
             listeners[eventName].forEach(cb => cb(...args));
           });
@@ -136,8 +139,28 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
         listeners[eventName].splice(index, 1);
       }
     },
-    shout: (...args) => vm.photoswipe && vm.photoswipe.shout(...args),
+    shout: (...args) => vm && vm.photoswipe && vm.photoswipe.shout(...args),
   };
+  vm = new Pswp({
+    propsData: {
+      initOptions: pswpOptions,
+      openPswp: photoswipe.open,
+      closePswp: photoswipe.close,
+      listen: photoswipe.listen,
+      unlisten: photoswipe.unlisten,
+      shout: photoswipe.shout,
+    },
+  }).$mount(getEl(mountEl));
+
+  if (vm.open) {
+    photoswipe.open = vm.open;
+  }
+  if (vm.close) {
+    photoswipe.close = vm.close;
+  }
+  if (vm.config) {
+    photoswipe.config = vm.config;
+  }
   Vue.photoswipe = photoswipe;
   Vue.prototype.$photoswipe = photoswipe;
 
@@ -168,6 +191,8 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
       w: p.w || el.naturalWidth || 0,
       h: p.h || el.naturalHeight || 0,
       title: p.title,
+      onTitleClick: p.onTitleClick,
+      customEventData: p.data,
     }));
     const options = {
       history: false,
@@ -197,6 +222,8 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
       item.index = value.index;
       item.origin = value.origin;
       item.title = value.title;
+      item.onTitleClick = value.onTitleClick;
+      item.data = value.data;
       item.gallery = value.gallery;
     }
     if (arg && typeof arg === 'string') {

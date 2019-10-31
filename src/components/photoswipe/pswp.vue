@@ -38,7 +38,21 @@
         </div>
         <button v-show="options.showArrow" class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
         <button v-show="options.showArrow" class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
-        <div class="pswp__caption">
+        <div
+          class="pswp__caption"
+          @MSPointerDown="onCaptionDown"
+          @MSPointerMove="onCaptionMove"
+          @MSPointerUp="onCaptionUp"
+          @pointerdown="onCaptionDown"
+          @pointermove="onCaptionMove"
+          @pointerup="onCaptionUp"
+          @touchstart="onCaptionDown"
+          @touchmove="onCaptionMove"
+          @touchend="onCaptionUp"
+          @mousedown="onCaptionDown"
+          @mousemove="onCaptionMove"
+          @mouseup="onCaptionUp"
+        >
           <div class="pswp__caption__center"></div>
         </div>
       </div>
@@ -72,6 +86,9 @@ export default {
   },
   data() {
     return {
+      captionUpTime: 0,
+      photoswipe: null,
+      items: [],
       options: Object.assign({}, pswpOptionsDefault, this.initOptions),
     };
   },
@@ -93,12 +110,35 @@ export default {
       });
     },
     open(items, options) {
-      return this.openPswp(items
+      this.items = items
         .filter(item => item && item.src)
-        .map(item => Object.assign({ w: 0, h: 0 }, item)), options);
+        .map(item => Object.assign({ w: 0, h: 0 }, item));
+      return this.openPswp(this.items, options);
     },
     close() {
       return this.closePswp();
+    },
+    onCaptionDown(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    onCaptionMove(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    onCaptionUp(e) {
+      const i = this.photoswipe.getCurrentIndex();
+      const item = this.items[i];
+      const captionUpTime = new Date().valueOf();
+      if (item) {
+        if (item.onTitleClick && captionUpTime - this.captionUpTime > 50) {
+          this.captionUpTime = captionUpTime;
+          item.onTitleClick(item.customEventData);
+        }
+        this.photoswipe.shout('title-click', item.customEventData);
+      }
+      e.preventDefault();
+      e.stopPropagation();
     },
   },
 };
