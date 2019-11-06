@@ -109,7 +109,6 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
     close: () => {
       if (vm && vm.photoswipe) {
         vm.photoswipe.close();
-        vm.photoswipe.destroy();
       }
     },
     config: (options) => {
