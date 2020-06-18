@@ -60,6 +60,16 @@ const getThumbBounds = (item, el) => {
   };
 };
 
+const itemToImageData = (p, el) => ({
+  msrc: getImageThumb(p, el),
+  src: getImageOrigin(p, el),
+  w: p.w || el.naturalWidth || 0,
+  h: p.h || el.naturalHeight || 0,
+  title: p.title,
+  onTitleClick: p.onTitleClick,
+  customEventData: p.data,
+});
+
 const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions = {} } = {}) => {
   let directiveIndex = 0;
   const itemMap = new Map();
@@ -69,7 +79,14 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
   const photoswipe = {
     open: (items, options) => new Promise((resolve, reject) => {
       if (vm) {
-        vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI, items, options);
+        vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI,
+          items.map(item => itemToImageData(item, item.$el)),
+          Object.assign({
+            getThumbBoundsFn: (index) => {
+              const p = items[index];
+              return getThumbBounds(p, p.$el);
+            },
+          }, options));
         // Auto fix wrong image size after loaded
         vm.photoswipe.listen('gettingData', (_, item) => {
           const img = new Image();
@@ -184,15 +201,7 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
       }
     }
     // prepare data and open PhotoSwipe
-    const images = items.map(([el, p]) => ({
-      msrc: getImageThumb(p, el),
-      src: getImageOrigin(p, el),
-      w: p.w || el.naturalWidth || 0,
-      h: p.h || el.naturalHeight || 0,
-      title: p.title,
-      onTitleClick: p.onTitleClick,
-      customEventData: p.data,
-    }));
+    const images = items.map(([el, p]) => itemToImageData(p, el));
     const options = {
       history: false,
       index: items.findIndex(({ 1: p }) => p === item) || 0,
