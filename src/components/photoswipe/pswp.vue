@@ -9,7 +9,7 @@
       <!-- Container that holds slides. -->
       <!-- PhotoSwipe keeps only 3 of them in the DOM to save memory. -->
       <!-- Don't modify these 3 pswp__item elements, data is added later on. -->
-      <div class="pswp__container">
+      <div class="pswp__container" @mousewheel.prevent="onMouseWheel">
         <div class="pswp__item"></div>
         <div class="pswp__item"></div>
         <div class="pswp__item"></div>
@@ -139,6 +139,16 @@ export default {
       }
       e.preventDefault();
       e.stopPropagation();
+    },
+    onMouseWheel(e) {
+      let ratio = 1.4;
+      if (e.deltaY > 0) {
+        ratio = 1 / ratio;
+      }
+      this.photoswipe.zoomTo(this.photoswipe.getZoomLevel() * ratio, null, 200);
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
     },
   },
 };
