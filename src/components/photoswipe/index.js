@@ -80,11 +80,16 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
     open: (items, options) => new Promise((resolve, reject) => {
       if (vm) {
         vm.photoswipe = new PhotoSwipe(vm.$el, PhotoSwipeUI,
-          items.map(item => itemToImageData(item, item.$el)),
+          items.map(item => (item && item.$el
+            ? itemToImageData(item, item.$el)
+            : item)),
           Object.assign({
             getThumbBoundsFn: (index) => {
               const p = items[index];
-              return getThumbBounds(p, p.$el);
+              if (p && p.$el) {
+                return getThumbBounds(p, p.$el);
+              }
+              return { x: 0, y: 0, w: 0 };
             },
           }, options));
         // Auto fix wrong image size after loaded
