@@ -53,22 +53,55 @@ const getThumbBounds = (item, el) => {
   }
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const rect = el.getBoundingClientRect();
-  return {
-    x: rect.left,
-    y: rect.top + scrollTop,
-    w: rect.width,
-  };
+  const style = window.getComputedStyle(el, null);
+  const paddingTop = parseFloat(style.getPropertyValue('padding-top')) || 0;
+  const paddingRight = parseFloat(style.getPropertyValue('padding-right')) || 0;
+  const paddingBottom = parseFloat(style.getPropertyValue('padding-bottom')) || 0;
+  const paddingLeft = parseFloat(style.getPropertyValue('padding-left')) || 0;
+  const borderTop = parseFloat(style.getPropertyValue('border-top-width')) || 0;
+  const borderRight = parseFloat(style.getPropertyValue('border-right-width')) || 0;
+  const borderBottom = parseFloat(style.getPropertyValue('border-bottom-width')) || 0;
+  const borderLeft = parseFloat(style.getPropertyValue('border-left-width')) || 0;
+  // content-box (default)
+  let x = rect.left + paddingLeft + borderLeft;
+  let y = rect.top + paddingTop + borderTop + scrollTop;
+  let w = rect.width - paddingLeft - paddingRight - borderLeft - borderRight;
+  let h = rect.height - paddingTop - paddingBottom - borderTop - borderBottom;
+  // fixes
+  if (el instanceof HTMLDivElement) {
+    const backgroundOrigin = style.getPropertyValue('background-origin');
+    if (backgroundOrigin === 'padding-box') {
+      x = rect.left + borderLeft;
+      y = rect.top + borderTop + scrollTop;
+      w = rect.width - borderLeft - borderRight;
+      h = rect.height - borderTop - borderBottom;
+    } else if (backgroundOrigin === 'border-box') {
+      x = rect.left;
+      y = rect.top + scrollTop;
+      w = rect.width;
+      h = rect.height;
+    }
+  }
+  return { x, y, w, h };
 };
 
-const itemToImageData = (p, el) => ({
-  msrc: getImageThumb(p, el),
-  src: getImageOrigin(p, el),
-  w: p.w || el.naturalWidth || 0,
-  h: p.h || el.naturalHeight || 0,
-  title: p.title,
-  onTitleClick: p.onTitleClick,
-  customEventData: p.data,
-});
+const itemToImageData = (p, el) => {
+  const data = {
+    msrc: getImageThumb(p, el),
+    src: getImageOrigin(p, el),
+    w: p.w || el.naturalWidth || 0,
+    h: p.h || el.naturalHeight || 0,
+    title: p.title,
+    onTitleClick: p.onTitleClick,
+    customEventData: p.data,
+  };
+  if (!data.w || !data.h) {
+    const rect = getThumbBounds(p, el);
+    data.w = rect.w;
+    data.h = rect.h;
+  }
+  return data;
+};
 
 const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions = {} } = {}) => {
   let directiveIndex = 0;
