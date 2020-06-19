@@ -140,7 +140,7 @@ const install = (Vue, { PswpVue = PswpVueDefault, mountEl, wechat, pswpOptions =
               item.w = w;
               item.h = h;
               // reinit items
-              vm.photoswipe.invalidateCurrItems();
+              // vm.photoswipe.invalidateCurrItems();
               vm.photoswipe.updateSize(true);
             }
           };
